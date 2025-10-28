@@ -1447,7 +1447,7 @@ void idPlayer::Spawn( void ) {
 			hud = uiManager->FindGui( temp, true, false, true );
 		}
 		if ( hud ) {
-			hud->Activate( true, GameLocal()->time );
+			hud->Activate( true, GameLocal()->GetTime() );
 		}
 
 		// load cursor
@@ -1455,7 +1455,7 @@ void idPlayer::Spawn( void ) {
 			cursor = uiManager->FindGui( temp, true, GameLocal()->isMultiplayer, GameLocal()->isMultiplayer );
 		}
 		if ( cursor ) {
-			cursor->Activate( true, GameLocal()->time );
+			cursor->Activate( true, GameLocal()->GetTime() );
 		}
 
 		objectiveSystem = uiManager->FindGui( "guis/pda.gui", true, false, true );
@@ -1552,7 +1552,7 @@ void idPlayer::Spawn( void ) {
 
 	if ( hud ) {
 		UpdateHudWeapon();
-		hud->StateChanged( GameLocal()->time );
+		hud->StateChanged( GameLocal()->GetTime() );
 	}
 
 	tipUp = false;
@@ -1579,7 +1579,7 @@ void idPlayer::Spawn( void ) {
 #ifndef ID_DEMO_BUILD
 			if ( g_skill.GetInteger() == 3 ) {
 				healthTake = true;
-				nextHealthTake = GameLocal()->time + g_healthTakeTime.GetInteger() * 1000;
+				nextHealthTake = GameLocal()->GetTime() + g_healthTakeTime.GetInteger() * 1000;
 			}
 #endif
 		}
@@ -2231,9 +2231,9 @@ void idPlayer::SpawnToPoint( const idVec3 &spawn_origin, const idAngles &spawn_a
 	if ( GameLocal()->isMultiplayer ) {
 		if ( !spectating ) {
 			// we may be called twice in a row in some situations. avoid a double fx and 'fly to the roof'
-			if ( lastTeleFX < GameLocal()->time - 1000 ) {
+			if ( lastTeleFX < GameLocal()->GetTime() - 1000 ) {
 				idEntityFx::StartFx( spawnArgs.GetString( "fx_spawn" ), &spawn_origin, NULL, this, true );
-				lastTeleFX = GameLocal()->time;
+				lastTeleFX = GameLocal()->GetTime();
 			}
 		}
 		AI_TELEPORT = true;
@@ -2251,8 +2251,8 @@ void idPlayer::SpawnToPoint( const idVec3 &spawn_origin, const idAngles &spawn_a
 	physicsObj.SetKnockBack( 100 );
 
 	// set our respawn time and buttons so that if we're killed we don't respawn immediately
-	minRespawnTime = GameLocal()->time;
-	maxRespawnTime = GameLocal()->time;
+	minRespawnTime = GameLocal()->GetTime();
+	maxRespawnTime = GameLocal()->GetTime();
 	if ( !spectating ) {
 		forceRespawn = false;
 	}
@@ -2705,7 +2705,7 @@ void idPlayer::UpdateConditions( void ) {
 		AI_BACKWARD		= false;
 		AI_STRAFE_LEFT	= false;
 		AI_STRAFE_RIGHT	= false;
-	} else if ( GameLocal()->time - lastDmgTime < 500 ) {
+	} else if ( GameLocal()->GetTime() - lastDmgTime < 500 ) {
 		forwardspeed = velocity * viewAxis[ 0 ];
 		sidespeed = velocity * viewAxis[ 1 ];
 		AI_FORWARD		= AI_ONGROUND && ( forwardspeed > 20.01f );
@@ -2908,7 +2908,7 @@ void idPlayer::GiveHealthPool( float amt ) {
 		if ( healthPool > inventory.maxHealth - health ) {
 			healthPool = inventory.maxHealth - health;
 		}
-		nextHealthPulse = GameLocal()->time;
+		nextHealthPulse = GameLocal()->GetTime();
 	}
 }
 
@@ -3135,7 +3135,7 @@ void idPlayer::UpdatePowerUps( void ) {
 
 	if ( !GameLocal()->isClient ) {
 		for ( i = 0; i < MAX_POWERUPS; i++ ) {
-			if ( PowerUpActive( i ) && inventory.powerupEndTime[i] <= GameLocal()->time ) {
+			if ( PowerUpActive( i ) && inventory.powerupEndTime[i] <= GameLocal()->GetTime() ) {
 				ClearPowerup( i );
 			}
 		}
@@ -3149,7 +3149,7 @@ void idPlayer::UpdatePowerUps( void ) {
 		}
 	}
 
-	if ( healthPool && GameLocal()->time > nextHealthPulse && !AI_DEAD && health > 0 ) {
+	if ( healthPool && GameLocal()->GetTime() > nextHealthPulse && !AI_DEAD && health > 0 ) {
 		assert( !GameLocal()->isClient );	// healthPool never be set on client
 		int amt = ( healthPool > 5 ) ? 5 : healthPool;
 		health += amt;
@@ -3159,17 +3159,17 @@ void idPlayer::UpdatePowerUps( void ) {
 		} else {
 			healthPool -= amt;
 		}
-		nextHealthPulse = GameLocal()->time + HEALTHPULSE_TIME;
+		nextHealthPulse = GameLocal()->GetTime() + HEALTHPULSE_TIME;
 		healthPulse = true;
 	}
 #ifndef ID_DEMO_BUILD
-	if ( !GameLocal()->inCinematic && influenceActive == 0 && g_skill.GetInteger() == 3 && GameLocal()->time > nextHealthTake && !AI_DEAD && health > g_healthTakeLimit.GetInteger() ) {
+	if ( !GameLocal()->inCinematic && influenceActive == 0 && g_skill.GetInteger() == 3 && GameLocal()->GetTime() > nextHealthTake && !AI_DEAD && health > g_healthTakeLimit.GetInteger() ) {
 		assert( !GameLocal()->isClient );	// healthPool never be set on client
 		health -= g_healthTakeAmt.GetInteger();
 		if ( health < g_healthTakeLimit.GetInteger() ) {
 			health = g_healthTakeLimit.GetInteger();
 		}
-		nextHealthTake = GameLocal()->time + g_healthTakeTime.GetInteger() * 1000;
+		nextHealthTake = GameLocal()->GetTime() + g_healthTakeTime.GetInteger() * 1000;
 		healthTake = true;
 	}
 #endif
@@ -3234,7 +3234,7 @@ void idPlayer::UpdateObjectiveInfo( void ) {
 		objectiveSystem->SetStateString( va( "objectivetext%i", i+1 ), inventory.objectiveNames[i].text.c_str() );
 		objectiveSystem->SetStateString( va( "objectiveshot%i", i+1 ), inventory.objectiveNames[i].screenshot.c_str() );
 	}
-	objectiveSystem->StateChanged( GameLocal()->time );
+	objectiveSystem->StateChanged( GameLocal()->GetTime() );
 }
 
 /*
@@ -3507,7 +3507,7 @@ void idPlayer::NextBestWeapon( void ) {
 		break;
 	}
 	idealWeapon = w;
-	weaponSwitchTime = GameLocal()->time + WEAPON_SWITCH_DELAY;
+	weaponSwitchTime = GameLocal()->GetTime() + WEAPON_SWITCH_DELAY;
 	UpdateHudWeapon();
 }
 
@@ -3556,7 +3556,7 @@ void idPlayer::NextWeapon( void ) {
 
 	if ( ( w != currentWeapon ) && ( w != idealWeapon ) ) {
 		idealWeapon = w;
-		weaponSwitchTime = GameLocal()->time + WEAPON_SWITCH_DELAY;
+		weaponSwitchTime = GameLocal()->GetTime() + WEAPON_SWITCH_DELAY;
 		UpdateHudWeapon();
 	}
 }
@@ -3606,7 +3606,7 @@ void idPlayer::PrevWeapon( void ) {
 
 	if ( ( w != currentWeapon ) && ( w != idealWeapon ) ) {
 		idealWeapon = w;
-		weaponSwitchTime = GameLocal()->time + WEAPON_SWITCH_DELAY;
+		weaponSwitchTime = GameLocal()->GetTime() + WEAPON_SWITCH_DELAY;
 		UpdateHudWeapon();
 	}
 }
@@ -3986,7 +3986,7 @@ void idPlayer::Weapon_GUI( void ) {
 		idUserInterface *ui = ActiveGui();
 		if ( ui ) {
 			ev = sys->GenerateMouseButtonEvent( 1, ( usercmd.buttons & BUTTON_ATTACK ) != 0 );
-			command = ui->HandleEvent( &ev, GameLocal()->time, &updateVisuals );
+			command = ui->HandleEvent( &ev, GameLocal()->GetTime(), &updateVisuals );
 			if ( updateVisuals && focusGUIent && ui == focusUI ) {
 				focusGUIent->UpdateVisuals();
 			}
@@ -4071,7 +4071,7 @@ void idPlayer::SpectateFreeFly( bool force ) {
 	idAngles	spawn_angles;
 
 	player = GameLocal()->GetClientByNum( spectator );
-	if ( force || GameLocal()->time > lastSpectateChange ) {
+	if ( force || GameLocal()->GetTime() > lastSpectateChange ) {
 		spectator = entityNumber;
 		if ( player && player != this && !player->spectating && !player->IsInTeleport() ) {
 			newOrig = player->GetPhysics()->GetOrigin();
@@ -4099,7 +4099,7 @@ void idPlayer::SpectateFreeFly( bool force ) {
 			SetOrigin( spawn_origin );
 			SetViewAngles( spawn_angles );
 		}
-		lastSpectateChange = GameLocal()->time + 500;
+		lastSpectateChange = GameLocal()->GetTime() + 500;
 	}
 }
 
@@ -4111,7 +4111,7 @@ idPlayer::SpectateCycle
 void idPlayer::SpectateCycle( void ) {
 	idPlayer *player;
 
-	if ( GameLocal()->time > lastSpectateChange ) {
+	if ( GameLocal()->GetTime() > lastSpectateChange ) {
 		int latchedSpectator = spectator;
 		spectator = GameLocal()->GetNextClientNum( spectator );
 		player = GameLocal()->GetClientByNum( spectator );
@@ -4121,7 +4121,7 @@ void idPlayer::SpectateCycle( void ) {
 			spectator = GameLocal()->GetNextClientNum( spectator );
 			player = GameLocal()->GetClientByNum( spectator );
 		}
-		lastSpectateChange = GameLocal()->time + 500;
+		lastSpectateChange = GameLocal()->GetTime() + 500;
 	}
 }
 
@@ -4217,7 +4217,7 @@ bool idPlayer::HandleSingleGuiCommand( idEntity *entityGui, idLexer *src ) {
 				for ( int i = 0; i < c; i++ ) {
 					const shaderStage_t *stage = mat->GetStage(i);
 					if ( stage && stage->texture.cinematic ) {
-						stage->texture.cinematic->ResetTime( GameLocal()->time );
+						stage->texture.cinematic->ResetTime( GameLocal()->GetTime() );
 					}
 				}
 				if ( pdaVideoWave.Length() ) {
@@ -4361,7 +4361,7 @@ void idPlayer::UpdateFocus( void ) {
 	oldTalkCursor	= talkCursor;
 	oldVehicle		= focusVehicle;
 
-	if ( focusTime <= GameLocal()->time ) {
+	if ( focusTime <= GameLocal()->GetTime() ) {
 		ClearFocus();
 	}
 
@@ -4412,7 +4412,7 @@ void idPlayer::UpdateFocus( void ) {
 						ClearFocus();
 						focusCharacter = static_cast<idAI *>( body );
 						talkCursor = 1;
-						focusTime = GameLocal()->time + FOCUS_TIME;
+						focusTime = GameLocal()->GetTime() + FOCUS_TIME;
 						break;
 					}
 				}
@@ -4426,7 +4426,7 @@ void idPlayer::UpdateFocus( void ) {
 						ClearFocus();
 						focusCharacter = static_cast<idAI *>( ent );
 						talkCursor = 1;
-						focusTime = GameLocal()->time + FOCUS_TIME;
+						focusTime = GameLocal()->GetTime() + FOCUS_TIME;
 						break;
 					}
 				}
@@ -4438,7 +4438,7 @@ void idPlayer::UpdateFocus( void ) {
 				if ( ( trace.fraction < 1.0f ) && ( trace.c.entityNum == ent->entityNumber ) ) {
 					ClearFocus();
 					focusVehicle = static_cast<idAFEntity_Vehicle *>( ent );
-					focusTime = GameLocal()->time + FOCUS_TIME;
+					focusTime = GameLocal()->GetTime() + FOCUS_TIME;
 					break;
 				}
 				continue;
@@ -4521,28 +4521,28 @@ void idPlayer::UpdateFocus( void ) {
 
 			// clamp the mouse to the corner
 			ev = sys->GenerateMouseMoveEvent( -2000, -2000 );
-			command = focusUI->HandleEvent( &ev, GameLocal()->time );
+			command = focusUI->HandleEvent( &ev, GameLocal()->GetTime() );
  			HandleGuiCommands( focusGUIent, command );
 
 			// move to an absolute position
 			ev = sys->GenerateMouseMoveEvent( pt.x * SCREEN_WIDTH, pt.y * SCREEN_HEIGHT );
-			command = focusUI->HandleEvent( &ev, GameLocal()->time );
+			command = focusUI->HandleEvent( &ev, GameLocal()->GetTime() );
 			HandleGuiCommands( focusGUIent, command );
-			focusTime = GameLocal()->time + FOCUS_GUI_TIME;
+			focusTime = GameLocal()->GetTime() + FOCUS_GUI_TIME;
 			break;
 		}
 	}
 
 	if ( focusGUIent && focusUI ) {
 		if ( !oldFocus || oldFocus != focusGUIent ) {
-			command = focusUI->Activate( true, GameLocal()->time );
+			command = focusUI->Activate( true, GameLocal()->GetTime() );
 			HandleGuiCommands( focusGUIent, command );
 			StartSound( "snd_guienter", SND_CHANNEL_ANY, 0, false, NULL );
 			// HideTip();
 			// HideObjective();
 		}
 	} else if ( oldFocus && oldUI ) {
-		command = oldUI->Activate( false, GameLocal()->time );
+		command = oldUI->Activate( false, GameLocal()->GetTime() );
 		HandleGuiCommands( oldFocus, command );
 		StartSound( "snd_guiexit", SND_CHANNEL_ANY, 0, false, NULL );
 	}
@@ -4661,31 +4661,31 @@ void idPlayer::CrashLand( const idVec3 &oldOrigin, const idVec3 &oldVelocity ) {
 	if ( delta > fatalDelta ) {
 		AI_HARDLANDING = true;
 		landChange = -32;
-		landTime = GameLocal()->time;
+		landTime = GameLocal()->GetTime();
 		if ( !noDamage ) {
-			pain_debounce_time = GameLocal()->time + pain_delay + 1;  // ignore pain since we'll play our landing anim
+			pain_debounce_time = GameLocal()->GetTime() + pain_delay + 1;  // ignore pain since we'll play our landing anim
 			Damage( NULL, NULL, idVec3( 0, 0, -1 ), "damage_fatalfall", 1.0f, 0 );
 		}
 	} else if ( delta > hardDelta ) {
 		AI_HARDLANDING = true;
 		landChange	= -24;
-		landTime	= GameLocal()->time;
+		landTime	= GameLocal()->GetTime();
 		if ( !noDamage ) {
-			pain_debounce_time = GameLocal()->time + pain_delay + 1;  // ignore pain since we'll play our landing anim
+			pain_debounce_time = GameLocal()->GetTime() + pain_delay + 1;  // ignore pain since we'll play our landing anim
 			Damage( NULL, NULL, idVec3( 0, 0, -1 ), "damage_hardfall", 1.0f, 0 );
 		}
 	} else if ( delta > 30 ) {
 		AI_HARDLANDING = true;
 		landChange	= -16;
-		landTime	= GameLocal()->time;
+		landTime	= GameLocal()->GetTime();
 		if ( !noDamage ) {
-			pain_debounce_time = GameLocal()->time + pain_delay + 1;  // ignore pain since we'll play our landing anim
+			pain_debounce_time = GameLocal()->GetTime() + pain_delay + 1;  // ignore pain since we'll play our landing anim
 			Damage( NULL, NULL, idVec3( 0, 0, -1 ), "damage_softfall", 1.0f, 0 );
 		}
 	} else if ( delta > 7 ) {
 		AI_SOFTLANDING = true;
 		landChange	= -8;
-		landTime	= GameLocal()->time;
+		landTime	= GameLocal()->GetTime();
 	} else if ( delta > 3 ) {
 		// just walk on
 	}
@@ -4745,7 +4745,7 @@ void idPlayer::BobCycle( const idVec3 &pushVelocity ) {
 
 		// check for footstep / splash sounds
 		old = bobCycle;
-		bobCycle = (int)( old + bobmove * GameLocal()->msec ) & 255;
+		bobCycle = (int)( old + bobmove * GameLocal()->GetMSec() ) & 255;
 		bobFoot = ( bobCycle & 128 ) >> 7;
 		bobfracsin = idMath::Fabs( sin( ( bobCycle & 127 ) / 127.0 * idMath::PI ) );
 	}
@@ -4786,7 +4786,7 @@ void idPlayer::BobCycle( const idVec3 &pushVelocity ) {
 	if ( physicsObj.HasSteppedUp() ) {
 
 		// check for stepping up before a previous step is completed
-		deltaTime = GameLocal()->time - stepUpTime;
+		deltaTime = GameLocal()->GetTime() - stepUpTime;
 		if ( deltaTime < STEPUP_TIME ) {
 			stepUpDelta = stepUpDelta * ( STEPUP_TIME - deltaTime ) / STEPUP_TIME + physicsObj.GetStepUp();
 		} else {
@@ -4795,13 +4795,13 @@ void idPlayer::BobCycle( const idVec3 &pushVelocity ) {
 		if ( stepUpDelta > 2.0f * pm_stepsize.GetFloat() ) {
 			stepUpDelta = 2.0f * pm_stepsize.GetFloat();
 		}
-		stepUpTime = GameLocal()->time;
+		stepUpTime = GameLocal()->GetTime();
 	}
 
 	idVec3 gravity = physicsObj.GetGravityNormal();
 
 	// if the player stepped up recently
-	deltaTime = GameLocal()->time - stepUpTime;
+	deltaTime = GameLocal()->GetTime() - stepUpTime;
 	if ( deltaTime < STEPUP_TIME ) {
 		viewBob += gravity * ( stepUpDelta * ( STEPUP_TIME - deltaTime ) / STEPUP_TIME );
 	}
@@ -4814,7 +4814,7 @@ void idPlayer::BobCycle( const idVec3 &pushVelocity ) {
 	viewBob[2] += bob;
 
 	// add fall height
-	delta = GameLocal()->time - landTime;
+	delta = GameLocal()->GetTime() - landTime;
 	if ( delta < LAND_DEFLECT_TIME ) {
 		f = delta / LAND_DEFLECT_TIME;
 		viewBob -= gravity * ( landChange * f );
@@ -4886,8 +4886,8 @@ void idPlayer::UpdateViewAngles( void ) {
 			viewAngles[i] = idMath::AngleNormalize180( SHORT2ANGLE( usercmd.angles[i]) + deltaViewAngles[i] );
 		}
 	}
-	if ( !centerView.IsDone( GameLocal()->time ) ) {
-		viewAngles.pitch = centerView.GetCurrentValue(GameLocal()->time);
+	if ( !centerView.IsDone( GameLocal()->GetTime() ) ) {
+		viewAngles.pitch = centerView.GetCurrentValue(GameLocal()->GetTime());
 	}
 
 	// clamp the pitch
@@ -4915,7 +4915,7 @@ void idPlayer::UpdateViewAngles( void ) {
 	SetAngles( idAngles( 0, viewAngles.yaw, 0 ) );
 
 	// save in the log for analyzing weapon angle offsets
-	loggedViewAngles[ GameLocal()->framenum & (NUM_LOGGED_VIEW_ANGLES-1) ] = viewAngles;
+	loggedViewAngles[ GameLocal()->GetFrameNum() & (NUM_LOGGED_VIEW_ANGLES-1) ] = viewAngles;
 }
 
 /*
@@ -4957,9 +4957,9 @@ void idPlayer::AdjustHeartRate( int target, float timeInSecs, float delay, bool 
 		return;
 	}
 
-    lastHeartAdjust = GameLocal()->time;
+    lastHeartAdjust = GameLocal()->GetTime();
 
-	heartInfo.Init( GameLocal()->time + delay * 1000, timeInSecs * 1000, heartRate, target );
+	heartInfo.Init( GameLocal()->GetTime() + delay * 1000, timeInSecs * 1000, heartRate, target );
 }
 
 /*
@@ -4970,7 +4970,7 @@ idPlayer::GetBaseHeartRate
 int idPlayer::GetBaseHeartRate( void ) {
 	int base = idMath::FtoiFast( ( BASE_HEARTRATE + LOWHEALTH_HEARTRATE_ADJ ) - ( (float)health / 100.0f ) * LOWHEALTH_HEARTRATE_ADJ );
 	int rate = idMath::FtoiFast( base + ( ZEROSTAMINA_HEARTRATE - base ) * ( 1.0f - stamina / pm_stamina.GetFloat() ) );
-	int diff = ( lastDmgTime ) ? GameLocal()->time - lastDmgTime : 99999;
+	int diff = ( lastDmgTime ) ? GameLocal()->GetTime() - lastDmgTime : 99999;
 	rate += ( diff < 5000 ) ? ( diff < 2500 ) ? ( diff < 1000 ) ? 15 : 10 : 5 : 0;
 	return rate;
 }
@@ -4987,15 +4987,15 @@ void idPlayer::SetCurrentHeartRate( void ) {
 	if ( PowerUpActive( ADRENALINE )) {
 		heartRate = 135;
 	} else {
-		heartRate = idMath::FtoiFast( heartInfo.GetCurrentValue( GameLocal()->time ) );
+		heartRate = idMath::FtoiFast( heartInfo.GetCurrentValue( GameLocal()->GetTime() ) );
 		int currentRate = GetBaseHeartRate();
-		if ( health >= 0 && GameLocal()->time > lastHeartAdjust + 2500 ) {
+		if ( health >= 0 && GameLocal()->GetTime() > lastHeartAdjust + 2500 ) {
 			AdjustHeartRate( currentRate, 2.5f, 0.0f, false );
 		}
 	}
 
 	int bps = idMath::FtoiFast( 60.0f / heartRate * 1000.0f );
-	if ( GameLocal()->time - lastHeartBeat > bps ) {
+	if ( GameLocal()->GetTime() - lastHeartBeat > bps ) {
 		int dmgVol = DMG_VOLUME;
 		int deathVol = DEATH_VOLUME;
 		int zeroVol = ZERO_VOLUME;
@@ -5024,7 +5024,7 @@ void idPlayer::SetCurrentHeartRate( void ) {
 			refSound.referenceSound->ModifySound( SND_CHANNEL_HEART, &parms );
 		}
 
-		lastHeartBeat = GameLocal()->time;
+		lastHeartBeat = GameLocal()->GetTime();
 	}
 }
 
@@ -5072,9 +5072,9 @@ void idPlayer::UpdateAir( void ) {
 			// check for damage
 			const idDict *damageDef = GameLocal()->FindEntityDefDict( "damage_noair", false );
 			int dmgTiming = 1000 * ((damageDef) ? damageDef->GetFloat( "delay", "3.0" ) : 3.0f );
-			if ( GameLocal()->time > lastAirDamage + dmgTiming ) {
+			if ( GameLocal()->GetTime() > lastAirDamage + dmgTiming ) {
 				Damage( NULL, NULL, vec3_origin, "damage_noair", 1.0f, 0 );
-				lastAirDamage = GameLocal()->time;
+				lastAirDamage = GameLocal()->GetTime();
 			}
 		}
 
@@ -5339,7 +5339,7 @@ void idPlayer::UpdatePDAInfo( bool updatePDASel ) {
 	if ( objectiveSystem->State().GetInt( "listPDA_sel_0", "-1" ) == -1 ) {
 		objectiveSystem->SetStateInt( "listPDA_sel_0", 0 );
 	}
-	objectiveSystem->StateChanged( GameLocal()->time );
+	objectiveSystem->StateChanged( GameLocal()->GetTime() );
 }
 
 /*
@@ -5402,7 +5402,7 @@ void idPlayer::TogglePDA( void ) {
 		objectiveSystem->SetStateInt( "listPDAEmail_sel_0", inventory.selEMail );
 		UpdatePDAInfo( false );
 		UpdateObjectiveInfo();
-		objectiveSystem->Activate( true, GameLocal()->time );
+		objectiveSystem->Activate( true, GameLocal()->GetTime() );
 		hud->HandleNamedEvent( "pdaPickupHide" );
 		hud->HandleNamedEvent( "videoPickupHide" );
 	} else {
@@ -5410,7 +5410,7 @@ void idPlayer::TogglePDA( void ) {
 		inventory.selVideo = objectiveSystem->State().GetInt( "listPDAVideo_sel_0" );
 		inventory.selAudio = objectiveSystem->State().GetInt( "listPDAAudio_sel_0" );
 		inventory.selEMail = objectiveSystem->State().GetInt( "listPDAEmail_sel_0" );
-		objectiveSystem->Activate( false, GameLocal()->time );
+		objectiveSystem->Activate( false, GameLocal()->GetTime() );
 	}
 	objectiveSystemOpen ^= 1;
 }
@@ -5571,7 +5571,7 @@ void idPlayer::PerformImpulse( int impulse ) {
 			break;
 		}
 		case IMPULSE_18: {
-			centerView.Init(GameLocal()->time, 200, viewAngles.pitch, 0);
+			centerView.Init(GameLocal()->GetTime(), 200, viewAngles.pitch, 0);
 			break;
 		}
 		case IMPULSE_19: {
@@ -5643,9 +5643,9 @@ idPlayer::EvaluateControls
 void idPlayer::EvaluateControls( void ) {
 	// check for respawning
 	if ( health <= 0 ) {
-		if ( ( GameLocal()->time > minRespawnTime ) && ( usercmd.buttons & BUTTON_ATTACK ) ) {
+		if ( ( GameLocal()->GetTime() > minRespawnTime ) && ( usercmd.buttons & BUTTON_ATTACK ) ) {
 			forceRespawn = true;
-		} else if ( GameLocal()->time > maxRespawnTime ) {
+		} else if ( GameLocal()->GetTime() > maxRespawnTime ) {
 			forceRespawn = true;
 		}
 	}
@@ -5687,7 +5687,7 @@ void idPlayer::AdjustSpeed( void ) {
 		bobFrac = 0.0f;
 	} else if ( !physicsObj.OnLadder() && ( usercmd.buttons & BUTTON_RUN ) && ( usercmd.forwardmove || usercmd.rightmove ) && ( usercmd.upmove >= 0 ) ) {
 		if ( !GameLocal()->isMultiplayer && !physicsObj.IsCrouching() && !PowerUpActive( ADRENALINE ) ) {
-			stamina -= MS2SEC( GameLocal()->msec );
+			stamina -= MS2SEC( GameLocal()->GetMSec() );
 		}
 		if ( stamina < 0 ) {
 			stamina = 0;
@@ -5708,7 +5708,7 @@ void idPlayer::AdjustSpeed( void ) {
 			 rate *= 1.25f;
 		}
 
-		stamina += rate * MS2SEC( GameLocal()->msec );
+		stamina += rate * MS2SEC( GameLocal()->GetMSec() );
 		if ( stamina > pm_stamina.GetFloat() ) {
 			stamina = pm_stamina.GetFloat();
 		}
@@ -6017,7 +6017,7 @@ void idPlayer::Move( void ) {
 		// bounce the view weapon
  		loggedAccel_t	*acc = &loggedAccel[currentLoggedAccel&(NUM_LOGGED_ACCELS-1)];
 		currentLoggedAccel++;
-		acc->time = GameLocal()->time;
+		acc->time = GameLocal()->GetTime();
 		acc->dir[2] = 200;
 		acc->dir[0] = acc->dir[1] = 0;
 	}
@@ -6053,8 +6053,8 @@ void idPlayer::UpdateHud( void ) {
 
 	int c = inventory.pickupItemNames.Num();
 	if ( c > 0 ) {
-		if ( GameLocal()->time > inventory.nextItemPickup ) {
-			if ( inventory.nextItemPickup && GameLocal()->time - inventory.nextItemPickup > 2000 ) {
+		if ( GameLocal()->GetTime() > inventory.nextItemPickup ) {
+			if ( inventory.nextItemPickup && GameLocal()->GetTime() - inventory.nextItemPickup > 2000 ) {
 				inventory.nextItemNum = 1;
 			}
 			int i;
@@ -6064,12 +6064,12 @@ void idPlayer::UpdateHud( void ) {
 				hud->HandleNamedEvent( va( "itemPickup%i", inventory.nextItemNum++ ) );
 				inventory.pickupItemNames.RemoveIndex( 0 );
 				if (inventory.nextItemNum == 1 ) {
-					inventory.onePickupTime = GameLocal()->time;
+					inventory.onePickupTime = GameLocal()->GetTime();
 				} else 	if ( inventory.nextItemNum > 5 ) {
 					inventory.nextItemNum = 1;
 					inventory.nextItemPickup = inventory.onePickupTime + 2000;
 				} else {
-					inventory.nextItemPickup = GameLocal()->time + 400;
+					inventory.nextItemPickup = GameLocal()->GetTime() + 400;
 				}
 			}
 		}
@@ -6127,15 +6127,15 @@ void idPlayer::UpdateDeathSkin( bool state_hitch ) {
 			doingDeathSkin = true;
 			renderEntity.noShadow = true;
 			if ( state_hitch ) {
-				renderEntity.shaderParms[ SHADERPARM_TIME_OF_DEATH ] = GameLocal()->time * 0.001f - 2.0f;
+				renderEntity.shaderParms[ SHADERPARM_TIME_OF_DEATH ] = GameLocal()->GetTime() * 0.001f - 2.0f;
 			} else {
-				renderEntity.shaderParms[ SHADERPARM_TIME_OF_DEATH ] = GameLocal()->time * 0.001f;
+				renderEntity.shaderParms[ SHADERPARM_TIME_OF_DEATH ] = GameLocal()->GetTime() * 0.001f;
 			}
 			UpdateVisuals();
 		}
 
 		// wait a bit before switching off the content
-		if ( deathClearContentsTime && GameLocal()->time > deathClearContentsTime ) {
+		if ( deathClearContentsTime && GameLocal()->GetTime() > deathClearContentsTime ) {
 			SetCombatContents( false );
 			deathClearContentsTime = 0;
 		}
@@ -6162,7 +6162,7 @@ void idPlayer::StartFxOnBone( const char *fx, const char *bone ) {
 		return;
 	}
 
-	if ( GetAnimator()->GetJointTransform( jointHandle, GameLocal()->time, offset, axis ) ) {
+	if ( GetAnimator()->GetJointTransform( jointHandle, GameLocal()->GetTime(), offset, axis ) ) {
 		offset = GetPhysics()->GetOrigin() + offset * GetPhysics()->GetAxis();
 		axis = axis * GetPhysics()->GetAxis();
 	}
@@ -6219,7 +6219,7 @@ void idPlayer::Think( void ) {
 	if ( usercmd.forwardmove != oldCmd.forwardmove ) {
 		loggedAccel_t	*acc = &loggedAccel[currentLoggedAccel&(NUM_LOGGED_ACCELS-1)];
 		currentLoggedAccel++;
-		acc->time = GameLocal()->time;
+		acc->time = GameLocal()->GetTime();
 		acc->dir[0] = usercmd.forwardmove - oldCmd.forwardmove;
 		acc->dir[1] = acc->dir[2] = 0;
 	}
@@ -6227,22 +6227,22 @@ void idPlayer::Think( void ) {
 	if ( usercmd.rightmove != oldCmd.rightmove ) {
 		loggedAccel_t	*acc = &loggedAccel[currentLoggedAccel&(NUM_LOGGED_ACCELS-1)];
 		currentLoggedAccel++;
-		acc->time = GameLocal()->time;
+		acc->time = GameLocal()->GetTime();
 		acc->dir[1] = usercmd.rightmove - oldCmd.rightmove;
 		acc->dir[0] = acc->dir[2] = 0;
 	}
 
 	// freelook centering
 	if ( ( usercmd.buttons ^ oldCmd.buttons ) & BUTTON_MLOOK ) {
-		centerView.Init( GameLocal()->time, 200, viewAngles.pitch, 0 );
+		centerView.Init( GameLocal()->GetTime(), 200, viewAngles.pitch, 0 );
 	}
 
 	// zooming
 	if ( ( usercmd.buttons ^ oldCmd.buttons ) & BUTTON_ZOOM ) {
 		if ( ( usercmd.buttons & BUTTON_ZOOM ) && weapon.GetEntity() ) {
-			zoomFov.Init( GameLocal()->time, 200.0f, CalcFov( false ), weapon.GetEntity()->GetZoomFov() );
+			zoomFov.Init( GameLocal()->GetTime(), 200.0f, CalcFov( false ), weapon.GetEntity()->GetZoomFov() );
 		} else {
-			zoomFov.Init( GameLocal()->time, 200.0f, zoomFov.GetCurrentValue( GameLocal()->time ), DefaultFov() );
+			zoomFov.Init( GameLocal()->GetTime(), 200.0f, zoomFov.GetCurrentValue( GameLocal()->GetTime() ), DefaultFov() );
 		}
 	}
 
@@ -6277,7 +6277,7 @@ void idPlayer::Think( void ) {
 		if ( !GameLocal()->isMultiplayer ) {
 			SetCurrentHeartRate();
 			float scale = g_damageScale.GetFloat();
-			if ( g_useDynamicProtection.GetBool() && scale < 1.0f && GameLocal()->time - lastDmgTime > 500 ) {
+			if ( g_useDynamicProtection.GetBool() && scale < 1.0f && GameLocal()->GetTime() - lastDmgTime > 500 ) {
 				if ( scale < 1.0f ) {
 					scale += 0.05f;
 				}
@@ -6404,7 +6404,7 @@ void idPlayer::RouteGuiMouse( idUserInterface *gui ) {
 
 	if ( usercmd.mx != oldMouseX || usercmd.my != oldMouseY ) {
 		ev = sys->GenerateMouseMoveEvent( usercmd.mx - oldMouseX, usercmd.my - oldMouseY );
-		command = gui->HandleEvent( &ev, GameLocal()->time );
+		command = gui->HandleEvent( &ev, GameLocal()->GetTime() );
 		oldMouseX = usercmd.mx;
 		oldMouseY = usercmd.my;
 	}
@@ -6448,7 +6448,7 @@ void idPlayer::Kill( bool delayRespawn, bool nodamage ) {
 			if ( delayRespawn ) {
 				forceRespawn = false;
 				int delay = spawnArgs.GetFloat( "respawn_delay" );
-				minRespawnTime = GameLocal()->time + SEC2MS( delay );
+				minRespawnTime = GameLocal()->GetTime() + SEC2MS( delay );
 				maxRespawnTime = minRespawnTime + MAX_RESPAWN_TIME;
 			}
 		}
@@ -6492,13 +6492,13 @@ void idPlayer::Killed( idEntity *inflictor, idEntity *attacker, int damage, cons
 
 	if ( StartRagdoll() ) {
 		pm_modelView.SetInteger( 0 );
-		minRespawnTime = GameLocal()->time + RAGDOLL_DEATH_TIME;
+		minRespawnTime = GameLocal()->GetTime() + RAGDOLL_DEATH_TIME;
 		maxRespawnTime = minRespawnTime + MAX_RESPAWN_TIME;
 	} else {
 		// don't allow respawn until the death anim is done
 		// g_forcerespawn may force spawning at some later time
 		delay = spawnArgs.GetFloat( "respawn_delay" );
-		minRespawnTime = GameLocal()->time + SEC2MS( delay );
+		minRespawnTime = GameLocal()->GetTime() + SEC2MS( delay );
 		maxRespawnTime = minRespawnTime + MAX_RESPAWN_TIME;
 	}
 
@@ -6555,10 +6555,10 @@ void idPlayer::GetAIAimTargets( const idVec3 &lastSightPos, idVec3 &headPos, idV
 
 	origin = lastSightPos - physicsObj.GetOrigin();
 
-	GetJointWorldTransform( chestJoint, GameLocal()->time, offset, axis );
+	GetJointWorldTransform( chestJoint, GameLocal()->GetTime(), offset, axis );
 	headPos = offset + origin;
 
-	GetJointWorldTransform( headJoint, GameLocal()->time, offset, axis );
+	GetJointWorldTransform( headJoint, GameLocal()->GetTime(), offset, axis );
 	chestPos = offset + origin;
 }
 
@@ -6573,7 +6573,7 @@ void idPlayer::DamageFeedback( idEntity *victim, idEntity *inflictor, int &damag
 	assert( !GameLocal()->isClient );
 	damage *= PowerUpModifier( BERSERK );
 	if ( damage && ( victim != this ) && victim->IsType( idActor::Type ) ) {
-		SetLastHitTime( GameLocal()->time );
+		SetLastHitTime( GameLocal()->GetTime() );
 	}
 }
 
@@ -6763,10 +6763,10 @@ void idPlayer::Damage( idEntity *inflictor, idEntity *attacker, const idVec3 &di
 	if ( armorSave ) {
 		inventory.armor -= armorSave;
 
-		if ( GameLocal()->time > lastArmorPulse + 200 ) {
+		if ( GameLocal()->GetTime() > lastArmorPulse + 200 ) {
 			StartSound( "snd_hitArmor", SND_CHANNEL_ITEM, 0, false, NULL );
 		}
-		lastArmorPulse = GameLocal()->time;
+		lastArmorPulse = GameLocal()->GetTime();
 	}
 
 	if ( damageDef->dict.GetBool( "burn" ) ) {
@@ -6801,7 +6801,7 @@ void idPlayer::Damage( idEntity *inflictor, idEntity *attacker, const idVec3 &di
 		if ( !GameLocal()->isMultiplayer ) {
 			float scale = g_damageScale.GetFloat();
 			if ( g_useDynamicProtection.GetBool() && g_skill.GetInteger() < 2 ) {
-				if ( GameLocal()->time > lastDmgTime + 500 && scale > 0.25f ) {
+				if ( GameLocal()->GetTime() > lastDmgTime + 500 && scale > 0.25f ) {
 					scale -= 0.05f;
 					g_damageScale.SetFloat( scale );
 				}
@@ -6827,7 +6827,7 @@ void idPlayer::Damage( idEntity *inflictor, idEntity *attacker, const idVec3 &di
 
 			isTelefragged = damageDef->dict.GetBool( "telefrag" );
 
-			lastDmgTime = GameLocal()->time;
+			lastDmgTime = GameLocal()->GetTime();
 			Killed( inflictor, attacker, damage, dir, location );
 
 		} else {
@@ -6837,7 +6837,7 @@ void idPlayer::Damage( idEntity *inflictor, idEntity *attacker, const idVec3 &di
 			// let the anim script know we took damage
 			AI_PAIN = Pain( inflictor, attacker, damage, dir, location );
 			if ( !g_testDeath.GetBool() ) {
-				lastDmgTime = GameLocal()->time;
+				lastDmgTime = GameLocal()->GetTime();
 			}
 		}
 	} else {
@@ -6953,17 +6953,17 @@ float idPlayer::CalcFov( bool honorZoom ) {
 	float fov;
 
 	if ( fxFov ) {
-		return DefaultFov() + 10.0f + cos( ( GameLocal()->time + 2000 ) * 0.01 ) * 10.0f;
+		return DefaultFov() + 10.0f + cos( ( GameLocal()->GetTime() + 2000 ) * 0.01 ) * 10.0f;
 	}
 
 	if ( influenceFov ) {
 		return influenceFov;
 	}
 
-	if ( zoomFov.IsDone( GameLocal()->time ) ) {
+	if ( zoomFov.IsDone( GameLocal()->GetTime() ) ) {
 		fov = ( honorZoom && usercmd.buttons & BUTTON_ZOOM ) && weapon.GetEntity() ? weapon.GetEntity()->GetZoomFov() : DefaultFov();
 	} else {
-		fov = zoomFov.GetCurrentValue( GameLocal()->time );
+		fov = zoomFov.GetCurrentValue( GameLocal()->GetTime() );
 	}
 
 	// bound normal viewsize
@@ -6989,11 +6989,11 @@ idAngles idPlayer::GunTurningOffset( void ) {
 
 	a.Zero();
 
-	if ( GameLocal()->framenum < NUM_LOGGED_VIEW_ANGLES ) {
+	if ( GameLocal()->GetFrameNum() < NUM_LOGGED_VIEW_ANGLES ) {
 		return a;
 	}
 
-	idAngles current = loggedViewAngles[ GameLocal()->framenum & (NUM_LOGGED_VIEW_ANGLES-1) ];
+	idAngles current = loggedViewAngles[ GameLocal()->GetFrameNum() & (NUM_LOGGED_VIEW_ANGLES-1) ];
 
 	idAngles	av, base;
 	int weaponAngleOffsetAverages;
@@ -7005,7 +7005,7 @@ idAngles idPlayer::GunTurningOffset( void ) {
 
 	// calcualte this so the wrap arounds work properly
 	for ( int j = 1 ; j < weaponAngleOffsetAverages ; j++ ) {
-		idAngles a2 = loggedViewAngles[ ( GameLocal()->framenum - j ) & (NUM_LOGGED_VIEW_ANGLES-1) ];
+		idAngles a2 = loggedViewAngles[ ( GameLocal()->GetFrameNum() - j ) & (NUM_LOGGED_VIEW_ANGLES-1) ];
 
 		idAngles delta = a2 - current;
 
@@ -7056,7 +7056,7 @@ idVec3	idPlayer::GunAcceleratingOffset( void ) {
 		loggedAccel_t	*acc = &loggedAccel[i&(NUM_LOGGED_ACCELS-1)];
 
 		float	f;
-		float	t = GameLocal()->time - acc->time;
+		float	t = GameLocal()->GetTime() - acc->time;
 		if ( t >= weaponOffsetTime ) {
 			break;	// remainder are too old to care about
 		}
@@ -7117,7 +7117,7 @@ void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis ) {
 	idVec3 gravity = physicsObj.GetGravityNormal();
 
 	// drop the weapon when landing after a jump / fall
-	delta = GameLocal()->time - landTime;
+	delta = GameLocal()->GetTime() - landTime;
 	if ( delta < LAND_DEFLECT_TIME ) {
 		origin -= gravity * ( landChange*0.25f * delta / LAND_DEFLECT_TIME );
 	} else if ( delta < LAND_DEFLECT_TIME + LAND_RETURN_TIME ) {
@@ -7126,7 +7126,7 @@ void idPlayer::CalculateViewWeaponPos( idVec3 &origin, idMat3 &axis ) {
 
 	// speed sensitive idle drift
 	scale = xyspeed + 40.0f;
-	fracsin = scale * sin( MS2SEC( GameLocal()->time ) ) * 0.01f;
+	fracsin = scale * sin( MS2SEC( GameLocal()->GetTime() ) ) * 0.01f;
 	angles.roll		+= fracsin;
 	angles.yaw		+= fracsin;
 	angles.pitch	+= fracsin;
@@ -7266,7 +7266,7 @@ void idPlayer::CalculateFirstPersonView( void ) {
 		ang.yaw += viewAxis[ 0 ].ToYaw();
 
 		jointHandle_t joint = animator.GetJointHandle( "camera" );
-		animator.GetJointTransform( joint, GameLocal()->time, origin, axis );
+		animator.GetJointTransform( joint, GameLocal()->GetTime(), origin, axis );
 		firstPersonViewOrigin = ( origin + modelOffset ) * ( viewAxis * physicsObj.GetGravityAxis() ) + physicsObj.GetOrigin() + viewBob;
 		firstPersonViewAxis = axis * ang.ToMat3() * physicsObj.GetGravityAxis();
 	} else {
@@ -7311,7 +7311,7 @@ void idPlayer::CalculateRenderView( void ) {
 		renderView->shaderParms[ i ] = GameLocal()->globalShaderParms[ i ];
 	}
 	renderView->globalMaterial = GameLocal()->GetGlobalMaterial();
-	renderView->time = GameLocal()->time;
+	renderView->time = GameLocal()->GetTime();
 
 	// calculate size of 3D view
 	renderView->x = 0;
@@ -7341,7 +7341,7 @@ void idPlayer::CalculateRenderView( void ) {
 		} else if ( pm_thirdPerson.GetBool() ) {
 			OffsetThirdPersonView( pm_thirdPersonAngle.GetFloat(), pm_thirdPersonRange.GetFloat(), pm_thirdPersonHeight.GetFloat(), pm_thirdPersonClip.GetBool() );
 		} else if ( pm_thirdPersonDeath.GetBool() ) {
-			range = GameLocal()->time < minRespawnTime ? ( GameLocal()->time + RAGDOLL_DEATH_TIME - minRespawnTime ) * ( 120.0f / RAGDOLL_DEATH_TIME ) : 120.0f;
+			range = GameLocal()->GetTime() < minRespawnTime ? ( GameLocal()->GetTime() + RAGDOLL_DEATH_TIME - minRespawnTime ) * ( 120.0f / RAGDOLL_DEATH_TIME ) : 120.0f;
 			OffsetThirdPersonView( 0.0f, 20.0f + range, 0.0f, false );
 		} else {
 			renderView->vieworg = firstPersonViewOrigin;
@@ -7515,7 +7515,7 @@ void idPlayer::SetInfluenceView( const char *mtr, const char *skinname, float ra
 	if ( skinname && *skinname ) {
 		influenceSkin = declManager->FindSkin( skinname );
 		if ( head.GetEntity() ) {
-			head.GetEntity()->GetRenderEntity()->shaderParms[ SHADERPARM_TIMEOFFSET ] = -MS2SEC( GameLocal()->time );
+			head.GetEntity()->GetRenderEntity()->shaderParms[ SHADERPARM_TIMEOFFSET ] = -MS2SEC( GameLocal()->GetTime() );
 		}
 		UpdateVisuals();
 	}
@@ -7821,7 +7821,7 @@ void idPlayer::ClientPredictionThink( void ) {
 	UpdateViewAngles();
 
 	// update the smoothed view angles
-	if ( GameLocal()->framenum >= smoothedFrame && entityNumber != GameLocal()->localClientNum ) {
+	if ( GameLocal()->GetFrameNum() >= smoothedFrame && entityNumber != GameLocal()->localClientNum ) {
 		idAngles anglesDiff = viewAngles - smoothedAngles;
 		anglesDiff.Normalize180();
 		if ( idMath::Fabs( anglesDiff.yaw ) < 90.0f && idMath::Fabs( anglesDiff.pitch ) < 90.0f ) {
@@ -7937,7 +7937,7 @@ bool idPlayer::GetPhysicsToVisualTransform( idVec3 &origin, idMat3 &axis ) {
 
 	// smoothen the rendered origin and angles of other clients
 	// smooth self origin if snapshots are telling us prediction is off
-	if ( GameLocal()->isClient && GameLocal()->framenum >= smoothedFrame && ( entityNumber != GameLocal()->localClientNum || selfSmooth ) ) {
+	if ( GameLocal()->isClient && GameLocal()->GetFrameNum() >= smoothedFrame && ( entityNumber != GameLocal()->localClientNum || selfSmooth ) ) {
 		// render origin and axis
 		idMat3 renderAxis = viewAxis * GetPhysics()->GetAxis();
 		idVec3 renderOrigin = GetPhysics()->GetOrigin() + modelOffset * renderAxis;
@@ -7956,7 +7956,7 @@ bool idPlayer::GetPhysicsToVisualTransform( idVec3 &origin, idMat3 &axis ) {
 			}
 			smoothedOrigin = renderOrigin;
 
-			smoothedFrame = GameLocal()->framenum;
+			smoothedFrame = GameLocal()->GetFrameNum();
 			smoothedOriginUpdated = true;
 		}
 
@@ -8107,14 +8107,14 @@ void idPlayer::ReadFromSnapshot( const idBitMsgDelta &msg ) {
 		SetCombatContents( true );
 	} else if ( health < oldHealth && health > 0 ) {
 		if ( stateHitch ) {
-			lastDmgTime = GameLocal()->time;
+			lastDmgTime = GameLocal()->GetTime();
 		} else {
 			// damage feedback
 			const idDeclEntityDef *def = static_cast<const idDeclEntityDef *>( declManager->DeclByIndex( DECL_ENTITYDEF, lastDamageDef, false ) );
 			if ( def ) {
 				playerView.DamageImpulse( lastDamageDir * viewAxis.Transpose(), &def->dict );
 				AI_PAIN = Pain( NULL, NULL, oldHealth - health, lastDamageDir, lastDamageLocation );
-				lastDmgTime = GameLocal()->time;
+				lastDmgTime = GameLocal()->GetTime();
 			} else {
 				common->Warning( "NET: no damage def for damage feedback '%d'\n", lastDamageDef );
 			}
@@ -8187,7 +8187,7 @@ void idPlayer::ReadPlayerStateFromSnapshot( const idBitMsgDelta &msg ) {
 
 	for( i = 0; i < AMMO_NUMTYPES; i++ ) {
 		ammo = msg.ReadBits( ASYNC_PLAYER_INV_AMMO_BITS );
-		if ( GameLocal()->time >= inventory.ammoPredictTime ) {
+		if ( GameLocal()->GetTime() >= inventory.ammoPredictTime ) {
 			inventory.ammo[ i ] = ammo;
 		}
 	}
