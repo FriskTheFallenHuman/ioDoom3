@@ -130,13 +130,13 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "Ashen Studios"
-            VALUE "FileDescription", "Ashen - Familiar Engine with familiar look"
+            VALUE "CompanyName", "id Software"
+            VALUE "FileDescription", "DOOM 3"
             VALUE "FileVersion", "1, 0, 0, 1"
-            VALUE "InternalName", "Ashen Engine"
-            VALUE "LegalCopyright", "Copyright (C) 2025 Ashen Studios"
-            VALUE "OriginalFilename", "Ashen.EXE"
-            VALUE "ProductName", "Ashen Engine"
+            VALUE "InternalName", "DOOM 3"
+            VALUE "LegalCopyright", "Copyright (C) 2004 id Software"
+            VALUE "OriginalFilename", "Doom.EXE"
+            VALUE "ProductName", "DOOM 3"
             VALUE "ProductVersion", "1, 0, 0, 1"
         END
     END

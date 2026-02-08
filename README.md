@@ -1,12 +1,6 @@
-### Ashen Engine
+### ioDoom3
 
-* * *
 
-### ⚙️ Core Principles
-
-* **Engine-Faithful** — Preserves Doom 3’s original limits for authentic behavior.
-* **Simple** — No excess; just the essentials for indie projects.
-* **Transparent** — Clean structure, readable code, and modularity.
 
 * * *
 
@@ -26,7 +20,7 @@
     <img title="" src="GPLv3_Logo.svg" alt="GPLv3 Logo" width="320">
 </p>
 
-Ashen Engine is based on the Doom 3 Source Code and therefore uses the same license.
+ioDoom3 is based on the Doom 3 Source Code and therefore uses the same license.
 
 > ⚠️ **Note:** ️️️️The game data included with demo templates each have their own separate license. Please refer to the documentation in each demo template folder for specific licensing details.
 

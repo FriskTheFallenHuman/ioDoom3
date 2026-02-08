@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.20)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER  "")
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-project(Ashen-Engine CXX C)
+project(ioDoom3 CXX C)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -113,5 +113,5 @@ source_group( TREE ${ENGINE_SOURCE} PREFIX "" FILES ${src_engine} )
 add_executable(DoomEXE WIN32 ${src_engine})
 target_link_libraries(DoomEXE idLib external ${src_syslibs})
 target_precompile_headers(DoomEXE PRIVATE "${ENGINE_SOURCE}/idlib/precompiled.h")
-set_target_properties(DoomEXE PROPERTIES OUTPUT_NAME "Ashen" LINK_FLAGS "/PDB:\"Ashen.pdb\"" RUNTIME_OUTPUT_DIRECTORY $<1:>${OUTPUT_FOLDER})
+set_target_properties(DoomEXE PROPERTIES OUTPUT_NAME "ioDoom" LINK_FLAGS "/PDB:\"ioDoom.pdb\"" RUNTIME_OUTPUT_DIRECTORY $<1:>${OUTPUT_FOLDER})
 set_target_properties(DoomEXE PROPERTIES FOLDER "exes")
